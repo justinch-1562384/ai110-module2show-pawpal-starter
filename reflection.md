@@ -4,6 +4,29 @@
 
 **a. Initial design**
 
+### Three Core Actions
+- Let a user enter owner and pet information (linked)
+- Let a user add or edit tasks (including walks) withe fields such as duration and priority.
+- Based on the above, generate a schedule.
+
+Attributes: 
+Pet info
+Owner info
+Tasks (Duration, Prority)
+Schedule (Composed of task objects)
+
+Methods:
+
+Add pet info
+Add owner info (1-to-Many for pets)
+Add task (Many-to-Many, pets/owners)
+Create schedule 
+Edit Tasks
+Edit Pets/Users
+
+Build the following four classes: Owner, Pet, Task, Scheduler
+### Writeup
+
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 

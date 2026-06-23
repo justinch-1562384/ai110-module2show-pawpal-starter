@@ -1,15 +1,48 @@
 classDiagram
-    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
-    %% Keep this file updated so it matches your final implementation.
-
-    class ClassName {
-        +type attribute
-        +method() returnType
+    class Owner {
+        +int id
+        +String name
+        +String email
+        +String phone
+        +List~Pet~ pets
+        +addOwnerInfo(name String, email String, phone String) void
+        +editOwnerInfo(name String, email String, phone String) void
+        +addPet(pet Pet) void
+        +getPets() List~Pet~
     }
 
-    class AnotherClass {
-        +type attribute
-        +method() returnType
+    class Pet {
+        +int id
+        +String name
+        +String species
+        +String breed
+        +int age
+        +int ownerId
+        +addPetInfo(name String, species String, breed String, age int) void
+        +editPetInfo(name String, species String, breed String, age int) void
     }
 
-    ClassName --> AnotherClass : relationship
+    class Task {
+        +int id
+        +String name
+        +int duration
+        +String priority
+        +List~Pet~ assignedPets
+        +List~Owner~ assignedOwners
+        +addTask(name String, duration int, priority String) void
+        +editTask(name String, duration int, priority String) void
+        +assignToPet(pet Pet) void
+        +assignToOwner(owner Owner) void
+    }
+
+    class Scheduler {
+        +List~Task~ schedule
+        +addTask(task Task) void
+        +createSchedule() List~Task~
+        +getSchedule() List~Task~
+    }
+
+    Owner "1" --> "*" Pet : owns
+    Task "*" --> "*" Pet : assigned to
+    Task "*" --> "*" Owner : assigned to
+    Scheduler "1" *-- "*" Task : composed of
