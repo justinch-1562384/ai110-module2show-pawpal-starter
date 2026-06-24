@@ -25,16 +25,44 @@ Edit Tasks
 Edit Pets/Users
 
 Build the following four classes: Owner, Pet, Task, Scheduler
+
 ### Writeup
 
 - Briefly describe your initial UML design.
+
+The UML design initially drafted outlined the three core actions of the Pawpal+ app and the classes and attributes needed to add these actions. 
+
+In the diagram, there are four main classes, the data types within these classes, and an overview of the methods that these classes hold. The UML diagram also includes the relationships between each of these classes that may factor into our implementation. 
+
+
 - What classes did you include, and what responsibilities did you assign to each?
+
+I included the following classes:
+
+Pet = This class tracks a pet and their attributes, as well as the owner that they are assigned to 
+
+Owner = This will track the name of the pet's owner, who can have multiple pets.
+
+Scheduler = This will keep track of the various tasks available within the application. This will also add and tasks and setters/getters and an editing function  for schedules within the application:
+
+Task = This will track task details such as pet name and breed. Responsibilities include assigning pets/owners to a specific task and editing task details
 
 **b. Design changes**
 
 - Did your design change during implementation?
+
+A number of aspects changed during implementation after additional review from Claude Code.  The summary can be found here:
+
+Priority enum replaces raw str
+Pet.owner_id: int → owner: Owner object reference
+Task gains scheduled_time: Optional[str]; add_task removed (belongs on Scheduler); edit_task kept as a setter stub
+Owner loses add_owner_info (duplicate of __init__); gains remove_pet and get_pet_by_id
+Scheduler gains owner: Owner and available_minutes: int on __init__; gains remove_task and get_task_by_id
+
+
 - If yes, describe at least one change and why you made it.
 
+I approved the change to change from a raw_str to an enum. This was done to standardize the priority classes from strings which are mutable and can be changed to a a enum that forces the application to choose from specific entries that are specified at startup. 
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
