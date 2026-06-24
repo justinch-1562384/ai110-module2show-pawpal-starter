@@ -75,8 +75,12 @@ I approved the change to change from a raw_str to an enum. This was done to stan
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+
+When a conflict is detected, the Scheduler does not suggest an alternative time. Additionally, when the scheduler enters a task that does not have a time added, it will not be checked for conflicts. 
+
 - Why is that tradeoff reasonable for this scenario?
 
+As a workaround, we can enforce inputting a time for PawPal, with a stretch goal for a feature that "fit" the task into gaps within the schedule later into development. When under the assumption that our users know their scheduled times to work with pets and wish to set priorities, the tradeoff may not be a issue for most issues. For those who are starting off, this will be a tradeoff that will need to be considered in order for user retention. 
 ---
 
 ## 3. AI Collaboration
@@ -120,3 +124,27 @@ I approved the change to change from a raw_str to an enum. This was done to stan
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+
+Here are concrete, small improvements worth considering:
+
+Scheduling Logic
+
+Shortest-first tiebreaker in create_schedule (pawpal_system.py:138) — tasks with equal priority aren't sorted by duration, so a 45-min MEDIUM task can block two 15-min MEDIUM tasks. Sort by (priority_order, duration) to fit more tasks.
+
+Stale scheduled_time on skipped tasks (pawpal_system.py:143) — tasks that don't fit the budget keep their scheduled_time from a prior run. Clear it (task.scheduled_time = None) for tasks not added to the result.
+
+Configurable start time (pawpal_system.py:143) — the schedule starts at 00:00 (midnight). A start_hour param on Scheduler.__init__ would make the output actually readable (e.g. 08:00).
+
+Respect frequency in scheduling (pawpal_system.py:137) — "once" tasks that are already complete are already filtered, but "weekly" tasks are treated the same as "daily". A day-of-week check could skip weekly tasks on the wrong day.
+
+Data Integrity
+
+remove_task only touches self.schedule (pawpal_system.py:124) — it doesn't remove the task from the pet's tasks list, so get_all_tasks would still return it and it would reappear on the next create_schedule call.
+
+Duplicate get_all_tasks logic (pawpal_system.py:112-117) — Scheduler.get_all_tasks reimplements Owner.get_all_tasks (pawpal_system.py:98). Line 116 could just be return self.owner.get_all_tasks().
+
+Minor Efficiency
+
+O(n) duplicate check in add_task/add_pet (pawpal_system.py:32, pawpal_system.py:79) — if task not in self.tasks does a linear scan. Tracking a set of IDs alongside the list makes this O(1) for large task counts.
+The highest-impact one is #1 (tiebreaker sort) — it's a one-line fix to sorted_tasks that can meaningfully increase the number of tasks scheduled within the same time budget.

@@ -73,14 +73,36 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+### Sorting — `Scheduler.sort_by_time()`
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+Returns the current schedule sorted by `scheduled_time` in ascending order. Internally converts each time string to an integer minute offset via the shared `_to_minutes()` helper rather than sorting lexicographically — string comparison breaks for hour values beyond two digits. Tasks without a `scheduled_time` (unscheduled) sort to the end via a `float("inf")` sentinel.
+
+### Filtering — `Scheduler.create_schedule()`
+
+Filters and packs tasks using two passes:
+
+1. **Completion filter** — any task with `is_complete=True` is excluded before scheduling begins.
+2. **Budget filter** — tasks are sorted by `(priority, due_date)` and added greedily; a task is included only if `minutes_used + task.duration <= available_minutes`. Tasks that don't fit are skipped but remaining smaller tasks are still considered.
+
+`Scheduler.detect_conflicts()` applies a third filter internally: only tasks that have a `scheduled_time` set are checked for overlaps — unscheduled tasks are excluded from conflict analysis.
+
+### Conflict Detection — `Scheduler.detect_conflicts()`
+
+Detects overlapping time intervals and returns a warning string for each conflict. Uses an **O(n log n) sort + O(n) adjacent-pair sweep** rather than an O(n²) all-pairs comparison:
+
+1. Sort tasks by start time using `_to_minutes()`.
+2. Walk adjacent pairs: if `start[i] + duration[i] > start[i+1]`, the two tasks overlap.
+
+This is correct because if task A overlaps task C (non-adjacent after sorting), task B — which starts between A and C — must also overlap A, so no pair is ever missed by checking only neighbors.
+
+### Recurring Tasks — `Pet.complete_task()`
+
+When a task with `frequency="daily"` or `frequency="weekly"` is marked complete, `complete_task()` automatically queues a new copy of that task with:
+
+- A fresh id drawn from `Pet._next_id` (an O(1) counter seeded at construction, incremented on each use — avoids an O(n) `max()` scan per completion).
+- A `due_date` set to `today + 1 day` (daily) or `today + 7 days` (weekly).
+
+One-time tasks (`frequency="once"`) are marked complete and not re-queued.
 
 ## 📸 Demo Walkthrough
 
